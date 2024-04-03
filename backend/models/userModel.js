@@ -1,3 +1,6 @@
+// This file contains the user model definition.
+// It includes attributes and methods related to user data and interactions within the system.
+
 import mongoose from 'mongoose';
 
 const userSchema = mongoose.Schema({
@@ -13,10 +16,11 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: true
-    },
+    }
 }, {
     timestamps: true
-})
+});
 
-const User = mongoose.model('User', userSchema)
-export default User
+const User = mongoose.model('user', userSchema);
+export default User;
+
