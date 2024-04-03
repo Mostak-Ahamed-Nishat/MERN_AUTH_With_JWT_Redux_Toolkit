@@ -11,12 +11,35 @@ import generateToken from "../utils/generateToken.js";
 // @route   POST /api/users/auth
 // @access  Public
 
-const authUser = asyncHandler((req, res) => {
+const authUser = asyncHandler(async (req, res, next) => {
+
   const {
     email,
     password
   } = req.body;
+
+  //Check if the user is has account with this email
+  const user = await User.findOne({
+    email
+  });
+
+  if (user && (await user.matchPassword(password))) {
+    //If authenticate user generate a token
+    generateToken(res, user._id);
+    //Return a response to the client
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } else {
+    res.status(401);
+    throw new Error('Invalid email or password');
+  }
 });
+
+
+
 
 
 // @desc    Register a new user
@@ -30,44 +53,34 @@ const registerUser = asyncHandler(async (req, res) => {
     password
   } = req.body;
 
-
-
-
   // Check if the user is already registered with the email address
-  const isUserExist = await User.findOne({
+  const userExists = await User.findOne({
     email
   });
 
-  // If the user is already registered with the email address, send an error message
-  if (isUserExist) {
+  //If the user is already registered
+  if (userExists) {
     res.status(400);
     throw new Error('User already exists');
   }
 
-  // Encrypt password using bcrypt
-  const saltRounds = 10;
-  const salt = await bcrypt.genSalt(saltRounds);
-  const hashPassword = await bcrypt.hash(password, salt);
-
-  // Create a new user account
+  //Create the user 
   const user = await User.create({
     name,
     email,
-    password: hashPassword
+    password,
   });
 
-  //IF the user created successfully
+  //IF the user data created successfully
   if (user) {
-    //Generate JWT token
-    generateToken(res, user._id)
-    //Send the success message to the client
     res.status(201).json({
-      message: "Registration successful",
-      user
+      _id: user._id,
+      name: user.name,
+      email: user.email,
     });
   } else {
     res.status(400);
-    throw new Error('Registration failed');
+    throw new Error('Invalid user data');
   }
 
 });
@@ -78,14 +91,30 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/logout
 // @access  Public
 const logoutUser = (req, res) => {
-  res.send('logout user');
+  //Destroy the http cookie
+  res.cookie('jwt', '', {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    message: 'Logged out successfully'
+  });
 };
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
-  res.send('get profile');
+  if (req.user) {
+    res.json({
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
 });
 
 // @desc    Update user profile

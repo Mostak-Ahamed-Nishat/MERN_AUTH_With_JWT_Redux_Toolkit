@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import userRoutes from "./routes/userRoutes.js";
+import cookieParser from 'cookie-parser';
 
 import {
   errorHandler,
@@ -21,7 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: true
 }));
+app.use(cookieParser());
 
+
+//Routes
 app.use("/api/users", userRoutes);
 
 
