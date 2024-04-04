@@ -4,15 +4,11 @@ import bcrypt from "bcryptjs"
 import User from "./../models/userModel.js"
 import generateToken from "../utils/generateToken.js";
 
-
-
-
 // @desc    Auth user (login) & get token 
 // @route   POST /api/users/auth
 // @access  Public
 
 const authUser = asyncHandler(async (req, res, next) => {
-
   const {
     email,
     password
@@ -37,10 +33,6 @@ const authUser = asyncHandler(async (req, res, next) => {
     throw new Error('Invalid email or password');
   }
 });
-
-
-
-
 
 // @desc    Register a new user
 // @route   POST /api/users
@@ -85,8 +77,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 });
 
-
-
 // @desc    Logout user / clear cookie
 // @route   POST /api/users/logout
 // @access  Public
@@ -121,10 +111,8 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-
   //get the user profile by checking user id
   const user = await User.findById(req.user._id);
-
   //If the user is valid, update the user profile
   if (user) {
     //if user want to update name or email
@@ -134,9 +122,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     if (req.body.password) {
       user.password = req.body.password;
     }
-
     const updatedUser = await user.save();
-
     res.json({
       _id: updatedUser._id,
       name: updatedUser.name,
